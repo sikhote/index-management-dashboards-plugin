@@ -24,6 +24,7 @@ import {
 import { ContentPanel, ContentPanelActions } from "../../../../components/ContentPanel";
 import IndexControls from "../../components/IndexControls";
 import ApplyPolicyModal from "../../components/ApplyPolicyModal";
+import ConfirmationModal from "../../../../components/ConfirmationModal";
 import IndexEmptyPrompt from "../../components/IndexEmptyPrompt";
 import { DEFAULT_PAGE_SIZE_OPTIONS, DEFAULT_QUERY_PARAMS, indicesColumns } from "../../utils/constants";
 import { ModalConsumer } from "../../../../components/Modal";
@@ -169,6 +170,32 @@ export default class Indices extends Component<IndicesProps, IndicesState> {
     this.setState({ from: 0, search: queryText, query });
   };
 
+  onClickDeleteIndices = async (indices: string[]): Promise<void> => {
+    console.log("test");
+    // try {
+    //   if (!indices.length) return;
+    //   const { managedIndexService } = this.props;
+    //   const removePolicyResponse = await managedIndexService.removePolicy(indices);
+    //   if (removePolicyResponse.ok) {
+    //     const { updatedIndices, failedIndices, failures } = removePolicyResponse.response;
+    //     if (updatedIndices) {
+    //       this.context.notifications.toasts.addSuccess(`Removed policy from ${updatedIndices} managed indices`);
+    //     }
+    //     if (failures) {
+    //       this.context.notifications.toasts.addDanger(
+    //         `Failed to remove policy from ${failedIndices
+    //           .map((failedIndex) => `[${failedIndex.indexName}, ${failedIndex.reason}]`)
+    //           .join(", ")}`
+    //       );
+    //     }
+    //   } else {
+    //     this.context.notifications.toasts.addDanger(removePolicyResponse.error);
+    //   }
+    // } catch (err) {
+    //   this.context.notifications.toasts.addDanger(getErrorMessage(err, "There was a problem removing the policies"));
+    // }
+  };
+
   resetFilters = (): void => {
     this.setState({ search: DEFAULT_QUERY_PARAMS.search, query: Query.parse(DEFAULT_QUERY_PARAMS.search) });
   };
@@ -215,6 +242,21 @@ export default class Indices extends Component<IndicesProps, IndicesState> {
             {({ onShow }) => (
               <ContentPanelActions
                 actions={[
+                  {
+                    text: "Delete",
+                    buttonProps: {
+                      disabled: !selectedItems.length,
+                      onClick: () =>
+                        onShow(ConfirmationModal, {
+                          title: `Delete ${selectedItems.length === 1 ? selectedItems[0].index : `${selectedItems.length} indices`}`,
+                          bodyMessage: `Delete ${
+                            selectedItems.length === 1 ? `${selectedItems[0].index} index` : `${selectedItems.length} indices`
+                          } permanently? This action cannot be undone.`,
+                          actionMessage: "Delete",
+                          onAction: () => this.onClickDeleteIndices(selectedItems.map((item) => item.index)),
+                        }),
+                    },
+                  },
                   {
                     text: "Apply policy",
                     buttonProps: {
